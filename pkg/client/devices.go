@@ -13,7 +13,7 @@ func (c *Client) Devices() (map[int]models.Device, error) {
 
 	devices := make(map[int]models.Device)
 
-	resp, err := c.send(resty.MethodGet, "/device")
+	resp, err := c.send(resty.MethodGet, string(devicesEndpoint))
 
 	if err != nil {
 		return devices, err
@@ -38,7 +38,7 @@ func (c *Client) Device(id int) (models.Device, error) {
 
 	device := models.Device{}
 
-	resp, err := c.send(resty.MethodGet, fmt.Sprintf("/device(%d)", id))
+	resp, err := c.send(resty.MethodGet, fmt.Sprintf("%s(%d)", devicesEndpoint, id))
 
 	if err != nil {
 		return device, err

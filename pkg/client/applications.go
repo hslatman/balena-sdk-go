@@ -13,7 +13,7 @@ func (c *Client) Applications() (map[int]models.Application, error) {
 
 	apps := make(map[int]models.Application)
 
-	resp, err := c.send(resty.MethodGet, "/my_application")
+	resp, err := c.send(resty.MethodGet, string(applicationsEndpoint))
 
 	if err != nil {
 		return apps, err
@@ -38,7 +38,7 @@ func (c *Client) Application(id int) (models.Application, error) {
 
 	app := models.Application{}
 
-	resp, err := c.send(resty.MethodGet, fmt.Sprintf("/my_application(%d)", id))
+	resp, err := c.send(resty.MethodGet, fmt.Sprintf("%s(%d)", applicationsEndpoint, id))
 
 	if err != nil {
 		return app, err
@@ -62,7 +62,7 @@ func (c *Client) AllApplications() (map[int]models.Application, error) {
 
 	apps := make(map[int]models.Application)
 
-	resp, err := c.send(resty.MethodGet, "/application")
+	resp, err := c.send(resty.MethodGet, string(allApplicationsEndpoint))
 
 	if err != nil {
 		return apps, err

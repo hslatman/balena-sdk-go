@@ -8,38 +8,95 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+const (
+	version = "0.1.0"
+
+	defaultBaseURL           = "https://api.balena-cloud.com/v5"
+	defaultUserAgent         = "https://github.com/hslatman/balena-sdk-go"
+	defaultContentTypeHeader = "application/json"
+	defaultAcceptHeader      = "application/json"
+	defaultTimeOut           = 30 * time.Second
+)
+
+type endpoint string
+
+const (
+	allApplicationsEndpoint endpoint = "/application"
+	applicationsEndpoint    endpoint = "/my_application"
+	devicesEndpoint         endpoint = "/device"
+)
+
+type ClientModifier func(c *Client)
+
 type Client struct {
-	rc *resty.Client
+	rc           *resty.Client
+	modifiers    []ClientModifier
+	logger       Logger
+	debugEnabled bool
+	traceEnabled bool
 }
 
-func New(token string) (*Client, error) {
+func New(token string, modifiers ...ClientModifier) (*Client, error) {
 
 	// TODO: add additional configuration options / modifiers?
-	// TODO: add logging?
+	// TODO: default retries? support for proxy? TLS settings? other transports?
 
 	// Creating a new Resty client with defaults for all requests
 	rc := resty.New()
 
-	rc.SetHostURL("https://api.balena-cloud.com/v5")
-	rc.SetHeader("User-Agent", "https://github.com/hslatman/balena-sdk-go") // TODO: add version?
-	rc.SetHeader("Content-Type", "application/json")
-	rc.SetHeader("Accept", "application/json")
+	rc.SetHostURL(defaultBaseURL)
+	rc.SetHeader("User-Agent", defaultUserAgent) // TODO: add version?
+	rc.SetHeader("Content-Type", defaultContentTypeHeader)
+	rc.SetHeader("Accept", defaultAcceptHeader)
 
 	rc.SetAuthScheme("Bearer")
 	rc.SetAuthToken(token)
 
-	rc.SetTimeout(30 * time.Second)
+	rc.SetTimeout(defaultTimeOut)
+	rc.SetDebug(false)
 
-	rc.EnableTrace()  // TODO: make this optional?
-	rc.SetDebug(true) // TODO: make this optional?
+	c := &Client{
+		rc:           rc,
+		modifiers:    []ClientModifier{},
+		debugEnabled: false,
+		traceEnabled: false,
+	}
 
-	// TODO: default retries? support for proxy? TLS settings? other transports?
+	c.modifiers = append(c.modifiers, modifiers...)
+	for _, modifier := range c.modifiers {
+		modifier(c)
+	}
 
 	fmt.Println(rc)
+	fmt.Println(c)
 
-	return &Client{
-		rc: rc,
-	}, nil
+	return c, nil
+}
+
+func WithLogger(logger Logger) ClientModifier {
+	return func(c *Client) {
+		c.logger = logger
+	}
+}
+
+func WithTimeout(timeout time.Duration) ClientModifier {
+	return func(c *Client) {
+		c.rc.SetTimeout(timeout)
+	}
+}
+
+func WithDebug() ClientModifier {
+	return func(c *Client) {
+		c.debugEnabled = true
+		c.rc.SetDebug(true)
+	}
+}
+
+func WithTrace() ClientModifier {
+	return func(c *Client) {
+		c.traceEnabled = true
+		c.rc.EnableTrace()
+	}
 }
 
 func (c *Client) send(method string, url string) (*resty.Response, error) {
@@ -49,10 +106,15 @@ func (c *Client) send(method string, url string) (*resty.Response, error) {
 		return nil, err
 	}
 
-	// TODO: make these configurable; log to something different, etc.
-	fmt.Println(resp.StatusCode())
-	fmt.Println(resp)
-	fmt.Println(resp.Request.TraceInfo())
+	if c.debugEnabled {
+		c.debug(resp.Status())
+		c.debug(resp.String())
+	}
+
+	if c.traceEnabled {
+		// TODO: do more with the TraceInfo struct?
+		c.info("trace: " + fmt.Sprint(resp.Request.TraceInfo()))
+	}
 
 	statusCode := resp.StatusCode()
 	if statusCode < 200 || statusCode >= 300 { // TODO: check that this is OK
