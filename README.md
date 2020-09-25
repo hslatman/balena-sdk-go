@@ -37,4 +37,5 @@ func main() {
 ## TODO
 
 * Nicer [OData](https://www.odata.org/) implementation. Currently no real mature Go library available.
+* Add handling of $select, $filter, $expand, etc. (see above)
 * Fluent APIs? Seems to fit the OData paradigm.

@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -44,24 +45,35 @@ func New(token string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Applications() (map[int]models.Application, error) {
+func (c *Client) send(method string, url string) (*resty.Response, error) {
 
-	apps := make(map[int]models.Application)
-
-	resp, err := c.rc.R().
-		Get("/my_application")
-
+	resp, err := c.rc.R().Execute(method, url)
 	if err != nil {
-		return apps, err
+		return nil, err
 	}
 
-	// TODO: add $select and $filter
-
+	// TODO: make these configurable; log to something different, etc.
 	fmt.Println(resp.StatusCode())
 	fmt.Println(resp)
 	fmt.Println(resp.Request.TraceInfo())
 
-	// TODO: "fluent" APIs? Like, from Device call, instantly get to Application, or something like that?
+	statusCode := resp.StatusCode()
+	if statusCode < 200 || statusCode >= 300 { // TODO: check that this is OK
+		return nil, fmt.Errorf("response failed with status: %d (%s)", statusCode, http.StatusText(statusCode))
+	}
+
+	return resp, nil
+}
+
+func (c *Client) Applications() (map[int]models.Application, error) {
+
+	apps := make(map[int]models.Application)
+
+	resp, err := c.send(resty.MethodGet, "/my_application")
+
+	if err != nil {
+		return apps, err
+	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
@@ -82,16 +94,11 @@ func (c *Client) Application(id int) (models.Application, error) {
 
 	app := models.Application{}
 
-	resp, err := c.rc.R().
-		Get(fmt.Sprintf("/my_application(%d)", id))
+	resp, err := c.send(resty.MethodGet, fmt.Sprintf("/my_application(%d)", id))
 
 	if err != nil {
 		return app, err
 	}
-
-	fmt.Println(resp.StatusCode())
-	fmt.Println(resp)
-	fmt.Println(resp.Request.TraceInfo())
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 	first := data.Get("0")                   // first (and only) application, if found
@@ -111,16 +118,11 @@ func (c *Client) Devices() (map[int]models.Device, error) {
 
 	devices := make(map[int]models.Device)
 
-	resp, err := c.rc.R().
-		Get("/device")
+	resp, err := c.send(resty.MethodGet, "/device")
 
 	if err != nil {
 		return devices, err
 	}
-
-	fmt.Println(resp.StatusCode())
-	fmt.Println(resp)
-	fmt.Println(resp.Request.TraceInfo())
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
@@ -141,16 +143,11 @@ func (c *Client) Device(id int) (models.Device, error) {
 
 	device := models.Device{}
 
-	resp, err := c.rc.R().
-		Get(fmt.Sprintf("/device(%d)", id))
+	resp, err := c.send(resty.MethodGet, fmt.Sprintf("/device(%d)", id))
 
 	if err != nil {
 		return device, err
 	}
-
-	fmt.Println(resp.StatusCode())
-	fmt.Println(resp)
-	fmt.Println(resp.Request.TraceInfo())
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 	first := data.Get("0")                   // first (and only) device
@@ -170,16 +167,11 @@ func (c *Client) AllApplications() (map[int]models.Application, error) {
 
 	apps := make(map[int]models.Application)
 
-	resp, err := c.rc.R().
-		Get("/application")
+	resp, err := c.send(resty.MethodGet, "/application")
 
 	if err != nil {
 		return apps, err
 	}
-
-	fmt.Println(resp.StatusCode())
-	fmt.Println(resp)
-	fmt.Println(resp.Request.TraceInfo())
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
