@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/hslatman/balena-sdk-go/pkg/logger"
 )
 
 const (
@@ -31,7 +32,7 @@ type ClientModifier func(c *Client)
 type Client struct {
 	rc           *resty.Client
 	modifiers    []ClientModifier
-	logger       Logger
+	logger       logger.Logger
 	debugEnabled bool
 	traceEnabled bool
 }
@@ -73,7 +74,7 @@ func New(token string, modifiers ...ClientModifier) (*Client, error) {
 	return c, nil
 }
 
-func WithLogger(logger Logger) ClientModifier {
+func WithLogger(logger logger.Logger) ClientModifier {
 	return func(c *Client) {
 		c.logger = logger
 	}
@@ -122,4 +123,22 @@ func (c *Client) send(method string, url string) (*resty.Response, error) {
 	}
 
 	return resp, nil
+}
+
+func (c *Client) info(message string) {
+
+	if c.logger == nil {
+		return
+	}
+
+	c.logger.Info(message)
+}
+
+func (c *Client) debug(message string) {
+
+	if c.logger == nil {
+		return
+	}
+
+	c.logger.Debug(message)
 }

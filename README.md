@@ -12,17 +12,29 @@ Currently it's a work in progress and the client implementation as well as its (
 ```go
 import (
     "fmt"
-	"github.com/hslatman/balena-sdk-go/pkg/client"
+    "github.com/hslatman/balena-sdk-go/pkg/client"
+    "github.com/hslatman/balena-sdk-go/pkg/logger"
 )
 
 func main() {
+
+    // Create a new Client with ClientModifiers
+    logger := logger.NullLogger{}
 	token := "<your-balena-api-token>"
-	c, err := client.New(token)
+	c, err := client.New(
+		token,
+		client.WithLogger(logger),
+		client.WithTimeout(45*time.Second),
+		client.WithDebug(),
+		client.WithTrace(),
+    )
+    
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+    // Retrieve and loop through applications
 	apps, err := c.Applications()
 	if err != nil {
 		fmt.Println(err)
