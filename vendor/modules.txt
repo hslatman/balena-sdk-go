@@ -1,0 +1,12 @@
+# github.com/go-resty/resty/v2 v2.3.0
+## explicit
+github.com/go-resty/resty/v2
+# github.com/tidwall/gjson v1.6.1
+## explicit
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.0.1
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.0.2
+github.com/tidwall/pretty
+# golang.org/x/net v0.0.0-20200513185701-a91f0712d120
+golang.org/x/net/publicsuffix
