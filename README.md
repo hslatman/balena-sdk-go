@@ -20,29 +20,30 @@ func main() {
 
     // Create a new Client with ClientModifiers
     logger := logger.NullLogger{}
-	token := "<your-balena-api-token>"
-	c, err := client.New(
-		token,
-		client.WithLogger(logger),
-		client.WithTimeout(45*time.Second),
-		client.WithDebug(),
-		client.WithTrace(),
+    token := "<your-balena-api-token>"
+    c, err := client.New(
+        token,
+        client.WithLogger(logger),
+        client.WithTimeout(45*time.Second),
+        client.WithDebug(),
+        client.WithTrace(),
     )
-    
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 
     // Retrieve and loop through applications
-	apps, err := c.Applications()
-	if err != nil {
-		fmt.Println(err)
-	}
+    apps, err := c.Applications()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
 
-	for _, app := range apps {
-		fmt.Println(app)
-	}
+    for _, app := range apps {
+        fmt.Println(app)
+    }
 }
 ```
 
