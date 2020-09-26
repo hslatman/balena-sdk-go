@@ -39,6 +39,12 @@ const (
 	allApplicationsEndpoint endpoint = "/application"
 	applicationsEndpoint    endpoint = "/my_application"
 	devicesEndpoint         endpoint = "/device"
+	usersEndpoint           endpoint = "/user"
+	whoamiEndpoint          endpoint = "/whoami"
+	releasesEndpoint        endpoint = "/release"
+	applicationTagsEndpoint endpoint = "/application_tag"
+	deviceTagsEndpoint      endpoint = "/device_tag"
+	releaseTagsEndpoint     endpoint = "/release_tag"
 )
 
 type ClientModifier func(c *Client)
