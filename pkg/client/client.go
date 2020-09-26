@@ -46,6 +46,7 @@ const (
 	applicationTagsEndpoint endpoint = "/application_tag"
 	deviceTagsEndpoint      endpoint = "/device_tag"
 	releaseTagsEndpoint     endpoint = "/release_tag"
+	servicesEndpoint        endpoint = "/service"
 )
 
 type paramOption string
@@ -194,7 +195,6 @@ func (c *Client) createQuery(params map[paramOption]string) string {
 	} else {
 		expand, foundExpand := params[expandOption]
 		if foundExpand {
-			// TODO: process expand
 			part := "$expand=" + expand
 			queryParts = append(queryParts, part)
 		}

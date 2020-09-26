@@ -51,6 +51,34 @@ func (c *Client) ApplicationTagsByApplicationName(applicationName string) (map[i
 	return tags, nil
 }
 
+func (c *Client) ApplicationTagsByApplication(id int) (map[int]models.ApplicationTag, error) {
+
+	tags := make(map[int]models.ApplicationTag)
+
+	//"https://api.balena-cloud.com/v5/application_tag?\$filter=application/app_name%20eq%20'<NAME>'" \
+
+	params := make(map[paramOption]string)
+	params[filterOption] = "application/id%20eq%20" + strconv.Itoa(id)
+	resp, err := c.request(resty.MethodGet, string(applicationTagsEndpoint), params)
+
+	if err != nil {
+		return tags, err
+	}
+
+	// TODO: decide whether we need gjson dependency, or can do it easily, with a bit more wrangling, ourselves
+	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
+
+	for _, tag := range data.Array() {
+		t := models.ApplicationTag{}
+		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
+		}
+		tags[t.ID] = t
+	}
+
+	return tags, nil
+}
+
 func (c *Client) DeviceTagsByDeviceUUID(deviceUUID string) (map[int]models.DeviceTag, error) {
 
 	tags := make(map[int]models.DeviceTag)
