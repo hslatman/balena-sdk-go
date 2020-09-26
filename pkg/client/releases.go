@@ -17,7 +17,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -79,8 +78,9 @@ func (c *Client) ReleasesForApplication(id int) (map[int]models.Release, error) 
 	releases := make(map[int]models.Release)
 
 	// TODO: make this a bit nicer to work with? Essentially, it's how OData does filtering and such
-	url := string(releasesEndpoint) + "?" + url.PathEscape("$filter=belongs_to__application eq "+strconv.Itoa(id))
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "belongs_to__application%20eq%20" + strconv.Itoa(id)
+	resp, err := c.request(resty.MethodGet, string(releasesEndpoint), params)
 
 	if err != nil {
 		return releases, err

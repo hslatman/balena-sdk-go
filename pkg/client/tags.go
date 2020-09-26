@@ -29,8 +29,9 @@ func (c *Client) ApplicationTagsByApplicationName(applicationName string) (map[i
 
 	//"https://api.balena-cloud.com/v5/application_tag?\$filter=application/app_name%20eq%20'<NAME>'" \
 
-	url := string(applicationTagsEndpoint) + "?" + "$filter=application/app_name%20eq%20'" + applicationName + "'"
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "application/app_name%20eq%20'" + applicationName + "'"
+	resp, err := c.request(resty.MethodGet, string(applicationTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -54,8 +55,9 @@ func (c *Client) DeviceTagsByDeviceUUID(deviceUUID string) (map[int]models.Devic
 
 	tags := make(map[int]models.DeviceTag)
 
-	url := string(deviceTagsEndpoint) + "?" + "$filter=device/uuid%20eq%20'" + deviceUUID + "'"
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "device/uuid%20eq%20'" + deviceUUID + "'"
+	resp, err := c.request(resty.MethodGet, string(deviceTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -79,8 +81,9 @@ func (c *Client) ReleaseTagsByReleaseCommit(commit string) (map[int]models.Relea
 
 	tags := make(map[int]models.ReleaseTag)
 
-	url := string(releaseTagsEndpoint) + "?" + "$filter=release/commit%20eq%20'" + commit + "'"
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "release/commit%20eq%20'" + commit + "'"
+	resp, err := c.request(resty.MethodGet, string(releaseTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -104,8 +107,9 @@ func (c *Client) ReleaseTagsByReleaseID(id int) (map[int]models.ReleaseTag, erro
 
 	tags := make(map[int]models.ReleaseTag)
 
-	url := string(releaseTagsEndpoint) + "?" + "$filter=release/id%20eq%20'" + strconv.Itoa(id) + "'"
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "release/id%20eq%20'" + strconv.Itoa(id) + "'"
+	resp, err := c.request(resty.MethodGet, string(releaseTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err

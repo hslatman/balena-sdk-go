@@ -17,6 +17,7 @@ package client
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -45,6 +46,15 @@ const (
 	applicationTagsEndpoint endpoint = "/application_tag"
 	deviceTagsEndpoint      endpoint = "/device_tag"
 	releaseTagsEndpoint     endpoint = "/release_tag"
+)
+
+type paramOption string
+
+const (
+	filterOption  paramOption = "filter"
+	filtersOption paramOption = "filters"
+	expandOption  paramOption = "expand"
+	selectOption  paramOption = "select"
 )
 
 type ClientModifier func(c *Client)
@@ -145,6 +155,59 @@ func (c *Client) send(method string, url string) (*resty.Response, error) {
 	}
 
 	return resp, nil
+}
+
+func (c *Client) request(method string, url string, params map[paramOption]string) (*resty.Response, error) {
+
+	query := c.createQuery(params)
+
+	resp, err := c.rc.R().Execute(method, url+query)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.debugEnabled {
+		c.debug(resp.Status())
+		c.debug(resp.String())
+	}
+
+	if c.traceEnabled {
+		// TODO: do more with the TraceInfo struct?
+		c.info("trace: " + fmt.Sprint(resp.Request.TraceInfo()))
+	}
+
+	statusCode := resp.StatusCode()
+	if statusCode < 200 || statusCode >= 300 { // TODO: check that this is OK
+		return nil, fmt.Errorf("response failed with status: %d (%s)", statusCode, http.StatusText(statusCode))
+	}
+
+	return resp, nil
+}
+
+func (c *Client) createQuery(params map[paramOption]string) string {
+
+	queryParts := []string{}
+
+	_, foundFilters := params[filtersOption]
+	if foundFilters {
+		// TODO: process multiple filters;
+	} else {
+		expand, foundExpand := params[expandOption]
+		if foundExpand {
+			// TODO: process expand
+			part := "$expand=" + expand
+			queryParts = append(queryParts, part)
+		}
+		filter, foundFilter := params[filterOption]
+		if foundFilter {
+			part := "$filter=" + filter
+			queryParts = append(queryParts, part)
+		}
+	}
+
+	query := "?" + strings.Join(queryParts, "&")
+
+	return query
 }
 
 func (c *Client) info(message string) {

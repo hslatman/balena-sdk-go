@@ -74,8 +74,12 @@ func (c *Client) UsersAssociatedWithApplication(id int) (map[int]models.User, er
 
 	// TODO: make this a bit nicer to work with? Essentially, it's how OData does filtering and such
 	// TODO: this does return something, but it's an empty list; is that correct?
-	url := string(usersEndpoint) + "__is_member_of__application" + "?" + "$expand=user($select=id,username,actor),application_membership_role($select=id,name,actor)&$filter=is_member_of__application%20eq%20" + strconv.Itoa(id)
-	resp, err := c.send(resty.MethodGet, url)
+	params := make(map[paramOption]string)
+	params[filterOption] = "is_member_of__application%20eq%20" + strconv.Itoa(id)
+	params[expandOption] = "user($select=id,username,actor),application_membership_role($select=id,name,actor)"
+
+	url := string(usersEndpoint) + "__is_member_of__application"
+	resp, err := c.request(resty.MethodGet, url, params)
 
 	if err != nil {
 		return users, err
