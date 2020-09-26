@@ -33,6 +33,7 @@ func (c *Client) Applications() (map[int]models.Application, error) {
 		return apps, err
 	}
 
+	// TODO: decide whether we need gjson dependency, or can do it easily, with a bit more wrangling, ourselves
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
 	for _, app := range data.Array() {
