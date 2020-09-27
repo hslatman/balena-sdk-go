@@ -133,29 +133,18 @@ func WithTrace() ClientModifier {
 	}
 }
 
-func (c *Client) send(method string, url string) (*resty.Response, error) {
+func (c *Client) get(url string, params map[paramOption]string) (*resty.Response, error) {
+	return c.request(resty.MethodGet, url, params)
+}
 
-	resp, err := c.rc.R().Execute(method, url)
-	if err != nil {
-		return nil, err
-	}
+func (c *Client) post(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
+	// TODO: handle body
+	return c.request(resty.MethodPost, url, params)
+}
 
-	if c.debugEnabled {
-		c.debug(resp.Status())
-		c.debug(resp.String())
-	}
-
-	if c.traceEnabled {
-		// TODO: do more with the TraceInfo struct?
-		c.info("trace: " + fmt.Sprint(resp.Request.TraceInfo()))
-	}
-
-	statusCode := resp.StatusCode()
-	if statusCode < 200 || statusCode >= 300 { // TODO: check that this is OK
-		return nil, fmt.Errorf("response failed with status: %d (%s)", statusCode, http.StatusText(statusCode))
-	}
-
-	return resp, nil
+func (c *Client) patch(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
+	// TODO: handle body
+	return c.request(resty.MethodPatch, url, params)
 }
 
 func (c *Client) request(method string, url string, params map[paramOption]string) (*resty.Response, error) {

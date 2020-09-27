@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 
 	"github.com/hslatman/balena-sdk-go/pkg/models"
@@ -28,7 +27,8 @@ func (c *Client) Users() (map[int]models.User, error) {
 
 	users := make(map[int]models.User)
 
-	resp, err := c.send(resty.MethodGet, string(usersEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(string(usersEndpoint), params)
 
 	if err != nil {
 		return users, err
@@ -53,7 +53,8 @@ func (c *Client) WhoAmI() (models.WhoAmI, error) {
 	w := models.WhoAmI{}
 
 	url := "https://api.balena-cloud.com/user/v1" // This endpoint uses a different format than all other v5 APIs
-	resp, err := c.send(resty.MethodGet, url+string(whoamiEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(url+string(whoamiEndpoint), params)
 
 	if err != nil {
 		return w, err
@@ -79,7 +80,7 @@ func (c *Client) UsersAssociatedWithApplication(id int) (map[int]models.User, er
 	params[expandOption] = "user($select=id,username,actor),application_membership_role($select=id,name,actor)"
 
 	url := string(usersEndpoint) + "__is_member_of__application"
-	resp, err := c.request(resty.MethodGet, url, params)
+	resp, err := c.get(url, params)
 
 	if err != nil {
 		return users, err

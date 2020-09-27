@@ -1,6 +1,9 @@
 # github.com/go-resty/resty/v2 v2.3.0
 ## explicit
 github.com/go-resty/resty/v2
+# github.com/m7shapan/njson v1.0.2-0.20200926202950-08aae59f0d1a
+## explicit
+github.com/m7shapan/njson
 # github.com/tidwall/gjson v1.6.1
 ## explicit
 github.com/tidwall/gjson
