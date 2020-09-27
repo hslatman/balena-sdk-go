@@ -78,6 +78,29 @@ func (c *Client) ApplicationTagsByApplication(id int) (map[int]models.Applicatio
 	return tags, nil
 }
 
+func (c *Client) CreateTagForApplication(applicationID int, key string, value string) (models.ApplicationTag, error) {
+
+	tag := models.ApplicationTag{}
+
+	params := make(map[paramOption]string)
+	body := map[string]interface{}{
+		"application": applicationID,
+		"tag_key":     key,
+		"value":       value,
+	}
+
+	resp, err := c.post(string(applicationTagsEndpoint), params, body)
+	if err != nil {
+		return tag, err
+	}
+
+	if err := njson.Unmarshal(resp.Body(), &tag); err != nil {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
 func (c *Client) DeviceTagsByDeviceUUID(deviceUUID string) (map[int]models.DeviceTag, error) {
 
 	tags := make(map[int]models.DeviceTag)

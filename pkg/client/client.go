@@ -134,24 +134,34 @@ func WithTrace() ClientModifier {
 }
 
 func (c *Client) get(url string, params map[paramOption]string) (*resty.Response, error) {
-	return c.request(resty.MethodGet, url, params)
+	return c.request(resty.MethodGet, url, params, nil)
 }
 
 func (c *Client) post(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
 	// TODO: handle body
-	return c.request(resty.MethodPost, url, params)
+	return c.request(resty.MethodPost, url, params, body)
 }
 
 func (c *Client) patch(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
 	// TODO: handle body
-	return c.request(resty.MethodPatch, url, params)
+	return c.request(resty.MethodPatch, url, params, body)
 }
 
-func (c *Client) request(method string, url string, params map[paramOption]string) (*resty.Response, error) {
+func (c *Client) request(method string, url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
 
+	// Create the base request, using the default client and its defaults
+	req := c.rc.R()
+
+	if body != nil {
+		// Body can have several formats: https://github.com/go-resty/resty#various-post-method-combinations
+		req.SetBody(body)
+	}
+
+	// Prepare query parameters
 	query := c.createQuery(params)
 
-	resp, err := c.rc.R().Execute(method, url+query)
+	// Execute the request
+	resp, err := req.Execute(method, url+query)
 	if err != nil {
 		return nil, err
 	}
