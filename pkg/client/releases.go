@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/tidwall/gjson"
 )
@@ -28,7 +27,8 @@ func (c *Client) Releases() (map[int]models.Release, error) {
 
 	releases := make(map[int]models.Release)
 
-	resp, err := c.send(resty.MethodGet, string(releasesEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(string(releasesEndpoint), params)
 
 	if err != nil {
 		return releases, err
@@ -53,7 +53,8 @@ func (c *Client) Release(id int) (models.Release, error) {
 
 	release := models.Release{}
 
-	resp, err := c.send(resty.MethodGet, fmt.Sprintf("%s(%d)", releasesEndpoint, id))
+	params := make(map[paramOption]string)
+	resp, err := c.get(fmt.Sprintf("%s(%d)", releasesEndpoint, id), params)
 
 	if err != nil {
 		return release, err
@@ -80,7 +81,7 @@ func (c *Client) ReleasesForApplication(id int) (map[int]models.Release, error) 
 	// TODO: make this a bit nicer to work with? Essentially, it's how OData does filtering and such
 	params := make(map[paramOption]string)
 	params[filterOption] = "belongs_to__application%20eq%20" + strconv.Itoa(id)
-	resp, err := c.request(resty.MethodGet, string(releasesEndpoint), params)
+	resp, err := c.get(string(releasesEndpoint), params)
 
 	if err != nil {
 		return releases, err

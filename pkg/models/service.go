@@ -17,9 +17,8 @@ package models
 import "time"
 
 type Service struct {
-	ID          int       `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	ServiceName string    `json:"service_name"`
-
-	// TODO: application it refers to?
+	ID            int       `njson:"id"`
+	CreatedAt     time.Time `njson:"created_at"`
+	ServiceName   string    `njson:"service_name"`
+	ApplicationID int       `njson:"application.__id"` // NOTE: this is handled by njson
 }

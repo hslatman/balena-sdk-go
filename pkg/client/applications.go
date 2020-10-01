@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/tidwall/gjson"
 )
@@ -27,7 +26,8 @@ func (c *Client) Applications() (map[int]models.Application, error) {
 
 	apps := make(map[int]models.Application)
 
-	resp, err := c.send(resty.MethodGet, string(applicationsEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(string(applicationsEndpoint), params)
 
 	if err != nil {
 		return apps, err
@@ -53,7 +53,8 @@ func (c *Client) Application(id int) (models.Application, error) {
 
 	app := models.Application{}
 
-	resp, err := c.send(resty.MethodGet, fmt.Sprintf("%s(%d)", applicationsEndpoint, id))
+	params := make(map[paramOption]string)
+	resp, err := c.get(fmt.Sprintf("%s(%d)", applicationsEndpoint, id), params)
 
 	if err != nil {
 		return app, err
@@ -77,7 +78,8 @@ func (c *Client) AllApplications() (map[int]models.Application, error) {
 
 	apps := make(map[int]models.Application)
 
-	resp, err := c.send(resty.MethodGet, string(allApplicationsEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(string(allApplicationsEndpoint), params)
 
 	if err != nil {
 		return apps, err

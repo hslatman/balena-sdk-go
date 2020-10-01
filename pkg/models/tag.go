@@ -14,23 +14,32 @@
 
 package models
 
-type Tag struct {
-	ID     int    `json:"id"`
-	TagKey string `json:"tag_key"`
-	Value  string `json:"value"`
-}
+// type Tag struct {
+// 	ID     int    `njson:"id"`
+// 	TagKey string `njson:"tag_key"`
+// 	Value  string `njson:"value"`
+// }
 
 type ApplicationTag struct {
-	Tag
-	//ApplicationID int `json:"application.__id"`// TODO: can we get this easily?
+	//Tag // NOTE: njson doesn't seem to work with embedded structs
+	ID            int    `njson:"id"`
+	TagKey        string `njson:"tag_key"`
+	Value         string `njson:"value"`
+	ApplicationID int    `njson:"application.__id"`
 }
 
 type DeviceTag struct {
-	Tag
-	// TODO: device?
+	// Tag
+	ID            int    `njson:"id"`
+	TagKey        string `njson:"tag_key"`
+	Value         string `njson:"value"`
+	ApplicationID int    `njson:"device.__id"`
 }
 
 type ReleaseTag struct {
-	Tag
-	// TODO: release?
+	// Tag
+	ID            int    `njson:"id"`
+	TagKey        string `njson:"tag_key"`
+	Value         string `njson:"value"`
+	ApplicationID int    `njson:"release.__id"`
 }

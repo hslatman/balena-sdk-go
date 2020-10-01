@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/tidwall/gjson"
 )
@@ -27,7 +26,8 @@ func (c *Client) Devices() (map[int]models.Device, error) {
 
 	devices := make(map[int]models.Device)
 
-	resp, err := c.send(resty.MethodGet, string(devicesEndpoint))
+	params := make(map[paramOption]string)
+	resp, err := c.get(string(devicesEndpoint), params)
 
 	if err != nil {
 		return devices, err
@@ -52,7 +52,8 @@ func (c *Client) Device(id int) (models.Device, error) {
 
 	device := models.Device{}
 
-	resp, err := c.send(resty.MethodGet, fmt.Sprintf("%s(%d)", devicesEndpoint, id))
+	params := make(map[paramOption]string)
+	resp, err := c.get(fmt.Sprintf("%s(%d)", devicesEndpoint, id), params)
 
 	if err != nil {
 		return device, err

@@ -15,11 +15,10 @@
 package client
 
 import (
-	"encoding/json"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hslatman/balena-sdk-go/pkg/models"
+	"github.com/m7shapan/njson"
 	"github.com/tidwall/gjson"
 )
 
@@ -31,7 +30,7 @@ func (c *Client) ApplicationTagsByApplicationName(applicationName string) (map[i
 
 	params := make(map[paramOption]string)
 	params[filterOption] = "application/app_name%20eq%20'" + applicationName + "'"
-	resp, err := c.request(resty.MethodGet, string(applicationTagsEndpoint), params)
+	resp, err := c.get(string(applicationTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -42,7 +41,7 @@ func (c *Client) ApplicationTagsByApplicationName(applicationName string) (map[i
 
 	for _, tag := range data.Array() {
 		t := models.ApplicationTag{}
-		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+		if err := njson.Unmarshal([]byte(tag.Raw), &t); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
 		tags[t.ID] = t
@@ -59,7 +58,7 @@ func (c *Client) ApplicationTagsByApplication(id int) (map[int]models.Applicatio
 
 	params := make(map[paramOption]string)
 	params[filterOption] = "application/id%20eq%20" + strconv.Itoa(id)
-	resp, err := c.request(resty.MethodGet, string(applicationTagsEndpoint), params)
+	resp, err := c.get(string(applicationTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -70,7 +69,7 @@ func (c *Client) ApplicationTagsByApplication(id int) (map[int]models.Applicatio
 
 	for _, tag := range data.Array() {
 		t := models.ApplicationTag{}
-		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+		if err := njson.Unmarshal([]byte(tag.Raw), &t); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
 		tags[t.ID] = t
@@ -79,13 +78,36 @@ func (c *Client) ApplicationTagsByApplication(id int) (map[int]models.Applicatio
 	return tags, nil
 }
 
+func (c *Client) CreateTagForApplication(applicationID int, key string, value string) (models.ApplicationTag, error) {
+
+	tag := models.ApplicationTag{}
+
+	params := make(map[paramOption]string)
+	body := map[string]interface{}{
+		"application": applicationID,
+		"tag_key":     key,
+		"value":       value,
+	}
+
+	resp, err := c.post(string(applicationTagsEndpoint), params, body)
+	if err != nil {
+		return tag, err
+	}
+
+	if err := njson.Unmarshal(resp.Body(), &tag); err != nil {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
 func (c *Client) DeviceTagsByDeviceUUID(deviceUUID string) (map[int]models.DeviceTag, error) {
 
 	tags := make(map[int]models.DeviceTag)
 
 	params := make(map[paramOption]string)
 	params[filterOption] = "device/uuid%20eq%20'" + deviceUUID + "'"
-	resp, err := c.request(resty.MethodGet, string(deviceTagsEndpoint), params)
+	resp, err := c.get(string(deviceTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -96,7 +118,7 @@ func (c *Client) DeviceTagsByDeviceUUID(deviceUUID string) (map[int]models.Devic
 
 	for _, tag := range data.Array() {
 		t := models.DeviceTag{}
-		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+		if err := njson.Unmarshal([]byte(tag.Raw), &t); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
 		tags[t.ID] = t
@@ -111,7 +133,7 @@ func (c *Client) ReleaseTagsByReleaseCommit(commit string) (map[int]models.Relea
 
 	params := make(map[paramOption]string)
 	params[filterOption] = "release/commit%20eq%20'" + commit + "'"
-	resp, err := c.request(resty.MethodGet, string(releaseTagsEndpoint), params)
+	resp, err := c.get(string(releaseTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -122,7 +144,7 @@ func (c *Client) ReleaseTagsByReleaseCommit(commit string) (map[int]models.Relea
 
 	for _, tag := range data.Array() {
 		t := models.ReleaseTag{}
-		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+		if err := njson.Unmarshal([]byte(tag.Raw), &t); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
 		tags[t.ID] = t
@@ -137,7 +159,7 @@ func (c *Client) ReleaseTagsByReleaseID(id int) (map[int]models.ReleaseTag, erro
 
 	params := make(map[paramOption]string)
 	params[filterOption] = "release/id%20eq%20'" + strconv.Itoa(id) + "'"
-	resp, err := c.request(resty.MethodGet, string(releaseTagsEndpoint), params)
+	resp, err := c.get(string(releaseTagsEndpoint), params)
 
 	if err != nil {
 		return tags, err
@@ -148,7 +170,7 @@ func (c *Client) ReleaseTagsByReleaseID(id int) (map[int]models.ReleaseTag, erro
 
 	for _, tag := range data.Array() {
 		t := models.ReleaseTag{}
-		if err := json.Unmarshal([]byte(tag.Raw), &t); err != nil {
+		if err := njson.Unmarshal([]byte(tag.Raw), &t); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
 		tags[t.ID] = t
