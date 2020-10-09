@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package models
+package client
+
+import "github.com/hslatman/balena-sdk-go/pkg/models"
 
 type Device struct {
+	fluent
 	ID   int    `json:"id"`
 	Name string `json:"device_name"`
 	Type string `json:"device_type"`
 	UUID string `json:"uuid"`
 
 	// TODO: other fields
+}
+
+func (d Device) GetTags() (map[int]models.DeviceTag, error) {
+	return d.client.DeviceTagsByDeviceID(d.ID)
 }

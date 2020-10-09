@@ -152,6 +152,8 @@ func (c *Client) delete(url string) (*resty.Response, error) {
 
 func (c *Client) request(method string, url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
 
+	// TODO: add context?
+
 	// Create the base request, using the default client and its defaults
 	req := c.rc.R()
 

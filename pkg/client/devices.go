@@ -18,13 +18,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/tidwall/gjson"
 )
 
-func (c *Client) Devices() (map[int]models.Device, error) {
+func (c *Client) Devices() (map[int]Device, error) {
 
-	devices := make(map[int]models.Device)
+	devices := make(map[int]Device)
 
 	params := make(map[paramOption]string)
 	resp, err := c.get(string(devicesEndpoint), params)
@@ -36,21 +35,22 @@ func (c *Client) Devices() (map[int]models.Device, error) {
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
 	for _, device := range data.Array() {
-		d := models.Device{}
+		d := Device{}
 		if err := json.Unmarshal([]byte(device.Raw), &d); err != nil {
 			return devices, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
+		d.client = c
 		devices[d.ID] = d
 	}
 
 	return devices, nil
 }
 
-func (c *Client) Device(id int) (models.Device, error) {
+func (c *Client) Device(id int) (Device, error) {
 
 	// TODO: also lookup by other identifiers, like UUID, device name, device type, etc
 
-	device := models.Device{}
+	device := Device{}
 
 	params := make(map[paramOption]string)
 	resp, err := c.get(fmt.Sprintf("%s(%d)", devicesEndpoint, id), params)
@@ -69,6 +69,8 @@ func (c *Client) Device(id int) (models.Device, error) {
 	if err := json.Unmarshal([]byte(first.Raw), &device); err != nil {
 		return device, err
 	}
+
+	device.client = c
 
 	return device, nil
 }
