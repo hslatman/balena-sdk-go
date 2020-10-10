@@ -101,8 +101,8 @@ func New(token string, modifiers ...ClientModifier) (*Client, error) {
 	}
 
 	// TODO: this output should be made a little nicer to view
-	fmt.Println(rc)
-	fmt.Println(c)
+	//fmt.Println(rc)
+	//fmt.Println(c)
 
 	return c, nil
 }

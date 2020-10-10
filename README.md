@@ -53,4 +53,5 @@ func main() {
 * Add operations for changing resources (POST, PATCH, DELETE)
 * Nicer [OData](https://www.odata.org/) implementation. Currently no real mature Go library available.
 * Add handling of $select, $filter, $expand, etc. (see above)
-* Fluent APIs? Seems to fit the OData paradigm.
+* Fluent APIs? Seems to fit the OData paradigm. (e.g. see https://github.com/koltyakov/gosip for a pretty similar approach)
+* Add HTTP caching? For example using https://github.com/gregjones/httpcache. 
