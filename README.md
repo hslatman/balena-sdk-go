@@ -36,10 +36,10 @@ func main() {
 
 
     // Retrieve and loop through devices
-	devices, err := c.Devices().Get()
-	if err != nil {
-		fmt.Println(err)
-	}
+    devices, err := c.Devices().Get()
+    if err != nil {
+        fmt.Println(err)
+    }
 
     for _, d := range devices {
         fmt.Println(d)
@@ -47,20 +47,20 @@ func main() {
 
     // Retrieve id, name and type for the device with ID 1337
     dr := c.Device(1337).Select("id,device_name,device_type")
-	device, err := dr.Get()
-	if err != nil {
-		fmt.Println(err)
-	}
+    device, err := dr.Get()
+    if err != nil {
+        fmt.Println(err)
+    }
 
     fmt.Println(device)
-    
+
     // Retrieve the device tags for the device with ID 1337
     dtr := c.Device(1337).Tags()
-	deviceTags, err := dtr.Get()
-	if err != nil {
-		fmt.Println(err)
+    deviceTags, err := dtr.Get()
+    if err != nil {
+        fmt.Println(err)
     }
-    
+
     for _, t := range deviceTags {
         fmt.Println(t)
     }
