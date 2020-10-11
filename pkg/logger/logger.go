@@ -14,14 +14,24 @@
 
 package logger
 
+import (
+	"fmt"
+	"time"
+)
+
 type Logger interface {
 	Log(v ...interface{})
 	Logf(format string, v ...interface{})
 	Info(message string)
 	Debug(message string)
+	Warning(message string)
+	Error(message string)
 }
 
 type NullLogger struct {
+}
+
+type ExampleLogger struct {
 }
 
 func (nl NullLogger) Log(v ...interface{}) {
@@ -38,4 +48,36 @@ func (nl NullLogger) Info(message string) {
 
 func (nl NullLogger) Debug(message string) {
 	return
+}
+
+func (nl NullLogger) Warning(message string) {
+	return
+}
+
+func (nl NullLogger) Error(message string) {
+	return
+}
+
+func (l ExampleLogger) Log(v ...interface{}) {
+	fmt.Println(v[0])
+}
+
+func (l ExampleLogger) Logf(format string, v ...interface{}) {
+	fmt.Println(fmt.Sprintf(format, v))
+}
+
+func (l ExampleLogger) Info(message string) {
+	l.Log(fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + "  [INFO] " + message))
+}
+
+func (l ExampleLogger) Debug(message string) {
+	l.Log(fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " [DEBUG] " + message))
+}
+
+func (l ExampleLogger) Warning(message string) {
+	l.Log(fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " [WARN] " + message))
+}
+
+func (l ExampleLogger) Error(message string) {
+	l.Log(fmt.Sprint(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " [ERROR] " + message))
 }

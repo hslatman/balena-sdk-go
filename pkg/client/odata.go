@@ -1,89 +1,126 @@
+// Copyright 2020 Herman Slatman
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package client
 
 import (
+	"errors"
+	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/hslatman/balena-sdk-go/pkg/logger"
 )
 
 type ODataModifiers struct {
-	modifiers map[string]string
+	modifiers map[modifierOption]string
+	logger    logger.Logger
+	errors    []error
 }
 
-func NewODataModifiers() *ODataModifiers {
+func (c *Client) NewODataModifiers() *ODataModifiers {
 	return &ODataModifiers{
-		// TODO: different type?
-		modifiers: map[string]string{},
+		modifiers: map[modifierOption]string{},
+		logger:    c.logger,
+		errors:    []error{},
 	}
 }
 
-func (o *ODataModifiers) Get() map[string]string {
+func (o *ODataModifiers) Get() map[modifierOption]string {
 	return o.modifiers
 }
 
-// func (o *ODataModifiers) AddSelect(values string) *ODataModifiers {
-// 	// if o.mods == nil {
-// 	// 	o.mods = map[string]string{}
-// 	// }
-// 	// TODO: do vararg approach?
-// 	o.modifiers["$select"] = values
-// 	return o
-// }
+func (o *ODataModifiers) AddSelect(value string) *ODataModifiers {
 
-func (o *ODataModifiers) AddFilter(values string) *ODataModifiers {
-	// if o.mods == nil {
-	// 	o.mods = map[string]string{}
-	// }
-	o.modifiers["$filter"] = values
+	// TODO: vararg approach?
+
+	if _, ok := o.modifiers[selectOption]; ok {
+		o.errors = append(o.errors, errors.New("multiple $select parts currently not supported"))
+		return o
+	}
+
+	o.modifiers[selectOption] = value
+
 	return o
 }
 
-func createURL(endpoint string, modifiers *ODataModifiers) string {
+func (o *ODataModifiers) AddFilter(value string) *ODataModifiers {
 
-	// apiURL, _ := url.Parse(endpoint)
-	// query := "" //apiURL.Query() // url.Values{}
-	// for k, v := range modifiers.Get() {
-	// 	//query.Set(k, trimMultiline(v))
+	// TODO: vararg approach?
 
-	// }
-	// //apiURL.RawQuery = query.Encode()
-	// return apiURL.String()
+	if _, ok := o.modifiers[filterOption]; ok {
+		o.errors = append(o.errors, errors.New("multiple $select parts currently not supported"))
+		return o
+	}
+
+	o.modifiers[filterOption] = value
+
+	return o
+}
+
+func (o *ODataModifiers) AddExpand(value string) *ODataModifiers {
+
+	// TODO: vararg approach?
+
+	if _, ok := o.modifiers[expandOption]; ok {
+		o.errors = append(o.errors, errors.New("multiple $select parts currently not supported"))
+		return o
+	}
+
+	o.modifiers[expandOption] = value
+
+	return o
+}
+
+func (o *ODataModifiers) modifyURL(endpoint string) (string, error) {
+
+	if len(o.errors) > 0 {
+		err := "Compound error:"
+		for k, v := range o.errors {
+			err = strings.Join([]string{err, fmt.Sprintf("(%d) %s", k, v.Error())}, "\n")
+		}
+		return "", errors.New(err)
+	}
 
 	apiURL, _ := url.Parse(endpoint)
 
-	mods := modifiers.Get()
+	mods := o.Get()
 
 	if len(mods) == 0 {
-		return apiURL.String()
+		return apiURL.String(), nil
 	}
 
 	queryParts := []string{}
 
 	for k, v := range mods {
-		if k == "$filter" {
+		if k == filterOption {
 			part := "$filter=" + trimMultiline(v)
+			queryParts = append(queryParts, part)
+		}
+		if k == selectOption {
+			part := "$select=" + trimMultiline(v)
+			queryParts = append(queryParts, part)
+		}
+		if k == expandOption {
+			part := "$expand=" + trimMultiline(v)
 			queryParts = append(queryParts, part)
 		}
 	}
 
-	// _, foundFilters := params[filtersOption]
-	// if foundFilters {
-	// 	// TODO: process multiple filters;
-	// } else {
-	// 	expand, foundExpand := params[expandOption]
-	// 	if foundExpand {
-	// 		part := "$expand=" + expand
-	// 		queryParts = append(queryParts, part)
-	// 	}
-	// 	filter, foundFilter := params[filterOption]
-	// 	if foundFilter {
-	// 		part := "$filter=" + filter
-	// 		queryParts = append(queryParts, part)
-	// 	}
-	// }
-
 	query := "?" + strings.Join(queryParts, "&")
 
-	return apiURL.String() + query
+	return apiURL.String() + query, nil
 
 }
 
