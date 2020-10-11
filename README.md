@@ -47,10 +47,12 @@ func main() {
 }
 ```
 
+## OData
+
+A [PR](https://github.com/hslatman/balena-sdk-go/pull/4) is in progress to handle the OData API in a more fluent manner.
+
 ## TODO
 
 * More types of resources
 * Add operations for changing resources (POST, PATCH, DELETE)
-* Nicer [OData](https://www.odata.org/) implementation. Currently no real mature Go library available.
 * Add handling of $select, $filter, $expand, etc. (see above)
-* Fluent APIs? Seems to fit the OData paradigm.
