@@ -16,18 +16,46 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/tidwall/gjson"
 )
 
-func (c *Client) Devices() (map[int]models.Device, error) {
+type DevicesResource struct {
+	client    *Client
+	endpoint  string
+	modifiers *ODataModifiers
+
+	// TODO: context, configuration
+}
+
+func NewDevicesResource(c *Client) *DevicesResource {
+	return &DevicesResource{
+		client:    c,
+		endpoint:  string(devicesEndpoint),
+		modifiers: c.NewODataModifiers(),
+	}
+}
+
+func (c *Client) Devices() *DevicesResource {
+	return NewDevicesResource(c)
+}
+
+func (d *DevicesResource) Select(s string) *DevicesResource {
+	d.modifiers.AddSelect(s)
+	return d
+}
+
+func (d *DevicesResource) Filter(f string) *DevicesResource {
+	d.modifiers.AddFilter(f)
+	return d
+}
+
+func (d *DevicesResource) Get() (map[int]models.Device, error) {
 
 	devices := make(map[int]models.Device)
 
-	params := make(map[paramOption]string)
-	resp, err := c.get(string(devicesEndpoint), params)
+	resp, err := d.client.get(d.endpoint, d.modifiers)
 
 	if err != nil {
 		return devices, err
@@ -46,29 +74,9 @@ func (c *Client) Devices() (map[int]models.Device, error) {
 	return devices, nil
 }
 
-func (c *Client) Device(id int) (models.Device, error) {
-
-	// TODO: also lookup by other identifiers, like UUID, device name, device type, etc
-
-	device := models.Device{}
-
-	params := make(map[paramOption]string)
-	resp, err := c.get(fmt.Sprintf("%s(%d)", devicesEndpoint, id), params)
-
-	if err != nil {
-		return device, err
-	}
-
-	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
-	first := data.Get("0")                   // first (and only) device
-
-	if !first.Exists() {
-		return device, fmt.Errorf("device (@id=%d) not found", id)
-	}
-
-	if err := json.Unmarshal([]byte(first.Raw), &device); err != nil {
-		return device, err
-	}
-
-	return device, nil
+func (d *DevicesResource) GetByID(deviceID int) *DeviceResource {
+	return NewDeviceResource(
+		d.client,
+		deviceID,
+	)
 }

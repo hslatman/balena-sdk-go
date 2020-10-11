@@ -22,6 +22,7 @@ package models
 
 type ApplicationTag struct {
 	//Tag // NOTE: njson doesn't seem to work with embedded structs
+	// TODO: njson also doesn't seem to support omitempty and such
 	ID            int    `njson:"id"`
 	TagKey        string `njson:"tag_key"`
 	Value         string `njson:"value"`
@@ -30,16 +31,16 @@ type ApplicationTag struct {
 
 type DeviceTag struct {
 	// Tag
-	ID            int    `njson:"id"`
-	TagKey        string `njson:"tag_key"`
-	Value         string `njson:"value"`
-	ApplicationID int    `njson:"device.__id"`
+	ID       int    `njson:"id"`
+	TagKey   string `njson:"tag_key"`
+	Value    string `njson:"value"`
+	DeviceID int    `njson:"device.__id"`
 }
 
 type ReleaseTag struct {
 	// Tag
-	ID            int    `njson:"id"`
-	TagKey        string `njson:"tag_key"`
-	Value         string `njson:"value"`
-	ApplicationID int    `njson:"release.__id"`
+	ID        int    `njson:"id"`
+	TagKey    string `njson:"tag_key"`
+	Value     string `njson:"value"`
+	ReleaseID int    `njson:"release.__id"`
 }

@@ -40,3 +40,4 @@
 # Currently cmd/ contains a couple of programs that use the client
 # for local testing only; exclude it for now.
 cmd/
+archive/

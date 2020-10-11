@@ -17,7 +17,6 @@ package client
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -49,13 +48,13 @@ const (
 	servicesEndpoint        endpoint = "/service"
 )
 
-type paramOption string
+type modifierOption string
 
 const (
-	filterOption  paramOption = "filter"
-	filtersOption paramOption = "filters"
-	expandOption  paramOption = "expand"
-	selectOption  paramOption = "select"
+	filterOption  modifierOption = "filter"
+	filtersOption modifierOption = "filters"
+	expandOption  modifierOption = "expand"
+	selectOption  modifierOption = "select"
 )
 
 type ClientModifier func(c *Client)
@@ -101,8 +100,8 @@ func New(token string, modifiers ...ClientModifier) (*Client, error) {
 	}
 
 	// TODO: this output should be made a little nicer to view
-	fmt.Println(rc)
-	fmt.Println(c)
+	//fmt.Println(rc)
+	//fmt.Println(c)
 
 	return c, nil
 }
@@ -133,24 +132,25 @@ func WithTrace() ClientModifier {
 	}
 }
 
-func (c *Client) get(url string, params map[paramOption]string) (*resty.Response, error) {
-	return c.request(resty.MethodGet, url, params, nil)
+func (c *Client) get(url string, modifiers *ODataModifiers) (*resty.Response, error) {
+	return c.request(resty.MethodGet, url, modifiers, nil)
 }
 
-func (c *Client) post(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
-	return c.request(resty.MethodPost, url, params, body)
+func (c *Client) post(url string, modifiers *ODataModifiers, body interface{}) (*resty.Response, error) {
+	return c.request(resty.MethodPost, url, modifiers, body)
 }
 
-func (c *Client) patch(url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
-	return c.request(resty.MethodPatch, url, params, body)
+func (c *Client) patch(url string, modifiers *ODataModifiers, body interface{}) (*resty.Response, error) {
+	return c.request(resty.MethodPatch, url, modifiers, body)
 }
 
 func (c *Client) delete(url string) (*resty.Response, error) {
-	params := make(map[paramOption]string) // TODO: or should DELETEs support params?
-	return c.request(resty.MethodDelete, url, params, nil)
+	return c.request(resty.MethodDelete, url, nil, nil)
 }
 
-func (c *Client) request(method string, url string, params map[paramOption]string, body interface{}) (*resty.Response, error) {
+func (c *Client) request(method string, url string, modifiers *ODataModifiers, body interface{}) (*resty.Response, error) {
+
+	// TODO: add context?
 
 	// Create the base request, using the default client and its defaults
 	req := c.rc.R()
@@ -160,11 +160,17 @@ func (c *Client) request(method string, url string, params map[paramOption]strin
 		req.SetBody(body)
 	}
 
-	// Prepare query parameters
-	query := c.createQuery(params)
+	var requestURL string = url
+	var err error = nil
+	if modifiers != nil {
+		requestURL, err = modifiers.modifyURL(requestURL)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// Execute the request
-	resp, err := req.Execute(method, url+query)
+	resp, err := req.Execute(method, requestURL)
 	if err != nil {
 		return nil, err
 	}
@@ -185,35 +191,6 @@ func (c *Client) request(method string, url string, params map[paramOption]strin
 	}
 
 	return resp, nil
-}
-
-func (c *Client) createQuery(params map[paramOption]string) string {
-
-	if len(params) == 0 {
-		return ""
-	}
-
-	queryParts := []string{}
-
-	_, foundFilters := params[filtersOption]
-	if foundFilters {
-		// TODO: process multiple filters;
-	} else {
-		expand, foundExpand := params[expandOption]
-		if foundExpand {
-			part := "$expand=" + expand
-			queryParts = append(queryParts, part)
-		}
-		filter, foundFilter := params[filterOption]
-		if foundFilter {
-			part := "$filter=" + filter
-			queryParts = append(queryParts, part)
-		}
-	}
-
-	query := "?" + strings.Join(queryParts, "&")
-
-	return query
 }
 
 func (c *Client) info(message string) {
