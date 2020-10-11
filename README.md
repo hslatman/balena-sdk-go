@@ -34,25 +34,51 @@ func main() {
         return
     }
 
-    // Retrieve and loop through applications
-    apps, err := c.Applications()
-    if err != nil {
-        fmt.Println(err)
-        return
+
+    // Retrieve and loop through devices
+	devices, err := c.Devices().Get()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+    for _, d := range devices {
+        fmt.Println(d)
     }
 
-    for _, app := range apps {
-        fmt.Println(app)
+    // Retrieve id, name and type for the device with ID 1337
+    dr := c.Device(1337).Select("id,device_name,device_type")
+	device, err := dr.Get()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+    fmt.Println(device)
+    
+    // Retrieve the device tags for the device with ID 1337
+    dtr := c.Device(1337).Tags()
+	deviceTags, err := dtr.Get()
+	if err != nil {
+		fmt.Println(err)
     }
+    
+    for _, t := range deviceTags {
+        fmt.Println(t)
+    }
+
 }
 ```
+
+## OData
+
+This SDK uses the Balena OData API to retrieve and update data.
+The OData implementation is not generic and mostly geared towards the Balena API.
 
 ## TODO
 
 * Add authentication method; currently requires API token to be retrieved from portal.
 * More types of resources; many are currently missing.
 * Add operations for changing resources (POST, PATCH, DELETE).
-* Nicer [OData](https://www.odata.org/) implementation. Currently no real mature Go library available.
+* Nicer [OData](https://www.odata.org/) implementation? Currently no real mature Go library available.
 * Add HTTP caching? For example using https://github.com/gregjones/httpcache. 
 * Use fastjson? (https://github.com/valyala/fastjson)
 * Implement ID type (i.e. DeviceID, TagID, etc.)
