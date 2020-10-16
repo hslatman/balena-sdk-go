@@ -17,14 +17,14 @@ package models
 import "time"
 
 type Release struct {
-	ID              int       `json:"id"`
-	Commit          string    `json:"commit"`
-	Status          string    `json:"status"`
-	Source          string    `json:"source"`
-	CreatedAt       time.Time `json:"created_at"`
-	StartTimestamp  time.Time `json:"start_timestamp"`
-	EndTimestamp    time.Time `json:"end_timestamp"`
-	UpdateTimestamp time.Time `json:"update_timestamp"`
+	ID              int       `njson:"id"`
+	Commit          string    `njson:"commit"`
+	Status          string    `njson:"status"`
+	Source          string    `njson:"source"`
+	CreatedAt       time.Time `njson:"created_at"`
+	StartTimestamp  time.Time `njson:"start_timestamp"`
+	EndTimestamp    time.Time `njson:"end_timestamp"`
+	UpdateTimestamp time.Time `njson:"update_timestamp"`
 }
 
 // id

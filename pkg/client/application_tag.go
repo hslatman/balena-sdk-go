@@ -22,29 +22,29 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceTagResource struct {
-	client      *Client
-	endpoint    string
-	deviceTagID int
-	modifiers   *ODataModifiers
+type ApplicationTagResource struct {
+	client           *Client
+	endpoint         string
+	applicationTagID int
+	modifiers        *ODataModifiers
 }
 
-func NewDeviceTagResource(c *Client, deviceTagID int) *DeviceTagResource {
-	return &DeviceTagResource{
-		client:      c,
-		endpoint:    fmt.Sprintf("%s(%d)", deviceTagsEndpoint, deviceTagID),
-		deviceTagID: deviceTagID,
-		modifiers:   NewODataModifiers(c),
+func NewApplicationTagResource(c *Client, applicationTagID int) *ApplicationTagResource {
+	return &ApplicationTagResource{
+		client:           c,
+		endpoint:         fmt.Sprintf("%s(%d)", applicationTagsEndpoint, applicationTagID),
+		applicationTagID: applicationTagID,
+		modifiers:        NewODataModifiers(c),
 	}
 }
 
-func (c *Client) DeviceTag(deviceTagID int) *DeviceTagResource {
-	return NewDeviceTagResource(c, deviceTagID)
+func (c *Client) ApplicationTag(applicationTagID int) *ApplicationTagResource {
+	return NewApplicationTagResource(c, applicationTagID)
 }
 
-func (r *DeviceTagResource) Get() (models.DeviceTag, error) {
+func (r *ApplicationTagResource) Get() (models.ApplicationTag, error) {
 
-	tag := models.DeviceTag{}
+	tag := models.ApplicationTag{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
@@ -66,37 +66,12 @@ func (r *DeviceTagResource) Get() (models.DeviceTag, error) {
 	return tag, nil
 }
 
-func (r *DeviceTagResource) Update(value string) error {
-
-	body := map[string]interface{}{
-		"value": value,
-	}
-
-	_, err := r.client.patch(r.endpoint, r.modifiers, body)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *DeviceTagResource) Delete() error {
-
-	_, err := r.client.delete(r.endpoint, r.modifiers)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *DeviceTagResource) Select(s string) *DeviceTagResource {
+func (r *ApplicationTagResource) Select(s string) *ApplicationTagResource {
 	r.modifiers.AddSelect(s)
 	return r
 }
 
-func (r *DeviceTagResource) Expand(s string) *DeviceTagResource {
+func (r *ApplicationTagResource) Expand(s string) *ApplicationTagResource {
 	r.modifiers.AddExpand(s)
 	return r
 }

@@ -14,8 +14,11 @@
 
 package models
 
+import "time"
+
 type User struct {
-	ID       int    `json:"id"`
-	Actor    int    `json:"actor"`
-	Username string `json:"username"`
+	ID        int       `njson:"id"`
+	Actor     int       `njson:"actor"`
+	Username  string    `njson:"username"`
+	CreatedAt time.Time `njson:"created_at"`
 }

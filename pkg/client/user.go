@@ -15,67 +15,58 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/m7shapan/njson"
 	"github.com/tidwall/gjson"
 )
 
-type DevicesResource struct {
+type UserResource struct {
 	client    *Client
 	endpoint  string
+	userID    int
 	modifiers *ODataModifiers
-
-	// TODO: context, configuration
 }
 
-func NewDevicesResource(c *Client) *DevicesResource {
-	return &DevicesResource{
+func NewUserResource(c *Client, userID int) *UserResource {
+	return &UserResource{
 		client:    c,
-		endpoint:  string(devicesEndpoint),
+		endpoint:  fmt.Sprintf("%s(%d)", usersEndpoint, userID),
+		userID:    userID,
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Devices() *DevicesResource {
-	return NewDevicesResource(c)
+func (c *Client) User(userID int) *UserResource {
+	return NewUserResource(c, userID)
 }
 
-func (r *DevicesResource) Select(s string) *DevicesResource {
-	r.modifiers.AddSelect(s)
-	return r
-}
+func (r *UserResource) Get() (models.User, error) {
 
-func (r *DevicesResource) Filter(f string) *DevicesResource {
-	r.modifiers.AddFilter(f)
-	return r
-}
-
-func (r *DevicesResource) Get() (map[int]models.Device, error) {
-
-	devices := make(map[int]models.Device)
+	user := models.User{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return devices, err
+		return user, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
+	first := data.Get("0")                   // first (and only) device
 
-	for _, d := range data.Array() {
-		device := models.Device{}
-		if err := njson.Unmarshal([]byte(d.Raw), &device); err != nil {
-			return devices, err // TODO: don't do early return, but just skip this one and aggregate error?
-		}
-		devices[device.ID] = device
+	if !first.Exists() {
+		return user, fmt.Errorf("%s not found", r.endpoint)
 	}
 
-	return devices, nil
+	if err := njson.Unmarshal([]byte(first.Raw), &user); err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
-func (r *DevicesResource) FindByID(deviceID int) *DeviceResource {
-	return NewDeviceResource(
-		r.client,
-		deviceID,
-	)
+func (r *UserResource) Select(s string) *UserResource {
+	r.modifiers.AddSelect(s) // TODO: add validation that fields to be selected are valid fields for Device?
+	return r
 }

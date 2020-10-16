@@ -20,7 +20,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DevicesResource struct {
+type ApplicationsResource struct {
 	client    *Client
 	endpoint  string
 	modifiers *ODataModifiers
@@ -28,54 +28,59 @@ type DevicesResource struct {
 	// TODO: context, configuration
 }
 
-func NewDevicesResource(c *Client) *DevicesResource {
-	return &DevicesResource{
+func NewApplicationsResource(c *Client) *ApplicationsResource {
+	return &ApplicationsResource{
 		client:    c,
-		endpoint:  string(devicesEndpoint),
+		endpoint:  string(applicationsEndpoint),
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Devices() *DevicesResource {
-	return NewDevicesResource(c)
+func (c *Client) Applications() *ApplicationsResource {
+	return NewApplicationsResource(c)
 }
 
-func (r *DevicesResource) Select(s string) *DevicesResource {
+func (r *ApplicationsResource) Select(s string) *ApplicationsResource {
 	r.modifiers.AddSelect(s)
 	return r
 }
 
-func (r *DevicesResource) Filter(f string) *DevicesResource {
+func (r *ApplicationsResource) Filter(f string) *ApplicationsResource {
 	r.modifiers.AddFilter(f)
 	return r
 }
 
-func (r *DevicesResource) Get() (map[int]models.Device, error) {
+func (r *ApplicationsResource) All() *ApplicationsResource {
+	r.endpoint = string(allApplicationsEndpoint)
+	return r
+}
 
-	devices := make(map[int]models.Device)
+func (r *ApplicationsResource) Get() (map[int]models.Application, error) {
+
+	applications := make(map[int]models.Application)
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return devices, err
+		return applications, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
-	for _, d := range data.Array() {
-		device := models.Device{}
-		if err := njson.Unmarshal([]byte(d.Raw), &device); err != nil {
-			return devices, err // TODO: don't do early return, but just skip this one and aggregate error?
+	for _, a := range data.Array() {
+		application := models.Application{}
+		if err := njson.Unmarshal([]byte(a.Raw), &application); err != nil {
+			return applications, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
-		devices[device.ID] = device
+		applications[application.ID] = application
 	}
 
-	return devices, nil
+	return applications, nil
 }
 
-func (r *DevicesResource) FindByID(deviceID int) *DeviceResource {
-	return NewDeviceResource(
+func (r *ApplicationsResource) FindByID(applicationID int) *ApplicationResource {
+	return NewApplicationResource(
 		r.client,
-		deviceID,
+		applicationID,
 	)
 }

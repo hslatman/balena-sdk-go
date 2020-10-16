@@ -29,7 +29,7 @@ type ODataModifiers struct {
 	errors    []error
 }
 
-func (c *Client) NewODataModifiers() *ODataModifiers {
+func NewODataModifiers(c *Client) *ODataModifiers {
 	return &ODataModifiers{
 		modifiers: map[modifierOption]string{},
 		logger:    c.logger,

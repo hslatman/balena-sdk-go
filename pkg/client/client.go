@@ -144,8 +144,8 @@ func (c *Client) patch(url string, modifiers *ODataModifiers, body interface{}) 
 	return c.request(resty.MethodPatch, url, modifiers, body)
 }
 
-func (c *Client) delete(url string) (*resty.Response, error) {
-	return c.request(resty.MethodDelete, url, nil, nil)
+func (c *Client) delete(url string, modifiers *ODataModifiers) (*resty.Response, error) {
+	return c.request(resty.MethodDelete, url, modifiers, nil)
 }
 
 func (c *Client) request(method string, url string, modifiers *ODataModifiers, body interface{}) (*resty.Response, error) {
