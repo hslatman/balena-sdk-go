@@ -66,6 +66,31 @@ func (r *DeviceTagResource) Get() (models.DeviceTag, error) {
 	return tag, nil
 }
 
+func (r *DeviceTagResource) Update(value string) error {
+
+	body := map[string]interface{}{
+		"value": value,
+	}
+
+	_, err := r.client.patch(r.endpoint, r.modifiers, body)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *DeviceTagResource) Delete() error {
+
+	_, err := r.client.delete(r.endpoint, r.modifiers)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *DeviceTagResource) Select(s string) *DeviceTagResource {
 	r.modifiers.AddSelect(s)
 	return r

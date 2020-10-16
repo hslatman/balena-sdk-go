@@ -63,7 +63,7 @@ func (l ExampleLogger) Log(v ...interface{}) {
 }
 
 func (l ExampleLogger) Logf(format string, v ...interface{}) {
-	fmt.Println(fmt.Sprintf(format, v))
+	fmt.Println(fmt.Sprintf(format, v...))
 }
 
 func (l ExampleLogger) Info(message string) {

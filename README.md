@@ -88,3 +88,4 @@ It was inspired by the implementation in [gosip](https://github.com/koltyakov/go
 * Add typesafe handling of OData modifiers (i.e. eq, neq, etc.)
 * Add chaining of multiple subselects (if possible)
 * Add context.Context to requests (in the resources object?)
+* "Multi-layer" OData modifier handling

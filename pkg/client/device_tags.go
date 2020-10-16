@@ -70,7 +70,62 @@ func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
 
 }
 
+func (r *DeviceTagsResource) Create(deviceID int, key string, value string) (models.DeviceTag, error) {
+
+	tag := models.DeviceTag{}
+
+	body := map[string]interface{}{
+		"device":  deviceID,
+		"tag_key": key,
+		"value":   value,
+	}
+
+	resp, err := r.client.post(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return tag, err
+	}
+
+	if err := njson.Unmarshal(resp.Body(), &tag); err != nil {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
+func (r *DeviceTagsResource) Update(value string) error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	body := map[string]interface{}{
+		"value": value,
+	}
+
+	_, err := r.client.patch(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *DeviceTagsResource) Delete() error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	_, err := r.client.delete(r.endpoint, r.modifiers)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *DeviceTagsResource) Select(s string) *DeviceTagsResource {
 	r.modifiers.AddSelect(s)
+	return r
+}
+
+func (r *DeviceTagsResource) Filter(s string) *DeviceTagsResource {
+	r.modifiers.AddFilter(s)
 	return r
 }

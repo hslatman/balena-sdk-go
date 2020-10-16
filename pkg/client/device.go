@@ -80,3 +80,34 @@ func (r *DeviceResource) Tags() *DeviceTagsResource {
 	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'")
 	return tr
 }
+
+func (r *DeviceResource) AddTag(key string, value string) (models.DeviceTag, error) {
+
+	tr := NewDeviceTagsResource(
+		r.client,
+	)
+
+	return tr.Create(r.deviceID, key, value)
+}
+
+func (r *DeviceResource) UpdateTag(key string, value string) error {
+
+	tr := NewDeviceTagsResource(
+		r.client,
+	)
+
+	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return tr.Update(value)
+}
+
+func (r *DeviceResource) DeleteTag(key string) error {
+
+	tr := NewDeviceTagsResource(
+		r.client,
+	)
+
+	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return tr.Delete()
+}
