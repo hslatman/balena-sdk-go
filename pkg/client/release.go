@@ -80,3 +80,34 @@ func (r *ReleaseResource) Tags() *ReleaseTagsResource {
 	tr.modifiers.AddFilter("release/id%20eq%20'" + strconv.Itoa(r.releaseID) + "'")
 	return tr
 }
+
+func (r *ReleaseResource) AddTag(key string, value string) (models.ReleaseTag, error) {
+
+	tr := NewReleaseTagsResource(
+		r.client,
+	)
+
+	return tr.Create(r.releaseID, key, value)
+}
+
+func (r *ReleaseResource) UpdateTag(key string, value string) error {
+
+	tr := NewReleaseTagsResource(
+		r.client,
+	)
+
+	tr.modifiers.AddFilter("release/id%20eq%20'" + strconv.Itoa(r.releaseID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return tr.Update(value)
+}
+
+func (r *ReleaseResource) DeleteTag(key string) error {
+
+	tr := NewReleaseTagsResource(
+		r.client,
+	)
+
+	tr.modifiers.AddFilter("release/id%20eq%20'" + strconv.Itoa(r.releaseID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return tr.Delete()
+}

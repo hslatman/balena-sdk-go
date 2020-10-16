@@ -70,6 +70,56 @@ func (r *ReleaseTagsResource) Get() (map[int]models.ReleaseTag, error) {
 
 }
 
+func (r *ReleaseTagsResource) Create(releaseID int, key string, value string) (models.ReleaseTag, error) {
+
+	tag := models.ReleaseTag{}
+
+	body := map[string]interface{}{
+		"release": releaseID,
+		"tag_key": key,
+		"value":   value,
+	}
+
+	resp, err := r.client.post(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return tag, err
+	}
+
+	if err := njson.Unmarshal(resp.Body(), &tag); err != nil {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
+func (r *ReleaseTagsResource) Update(value string) error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	body := map[string]interface{}{
+		"value": value,
+	}
+
+	_, err := r.client.patch(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ReleaseTagsResource) Delete() error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	_, err := r.client.delete(r.endpoint, r.modifiers)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *ReleaseTagsResource) Select(s string) *ReleaseTagsResource {
 	r.modifiers.AddSelect(s)
 	return r

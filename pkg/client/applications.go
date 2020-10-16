@@ -50,6 +50,11 @@ func (r *ApplicationsResource) Filter(f string) *ApplicationsResource {
 	return r
 }
 
+func (r *ApplicationsResource) All() *ApplicationsResource {
+	r.endpoint = string(allApplicationsEndpoint)
+	return r
+}
+
 func (r *ApplicationsResource) Get() (map[int]models.Application, error) {
 
 	applications := make(map[int]models.Application)

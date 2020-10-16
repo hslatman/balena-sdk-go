@@ -70,6 +70,56 @@ func (r *ApplicationTagsResource) Get() (map[int]models.ApplicationTag, error) {
 
 }
 
+func (r *ApplicationTagsResource) Create(applicationID int, key string, value string) (models.ApplicationTag, error) {
+
+	tag := models.ApplicationTag{}
+
+	body := map[string]interface{}{
+		"application": applicationID,
+		"tag_key":     key,
+		"value":       value,
+	}
+
+	resp, err := r.client.post(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return tag, err
+	}
+
+	if err := njson.Unmarshal(resp.Body(), &tag); err != nil {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
+func (r *ApplicationTagsResource) Update(value string) error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	body := map[string]interface{}{
+		"value": value,
+	}
+
+	_, err := r.client.patch(r.endpoint, r.modifiers, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ApplicationTagsResource) Delete() error {
+
+	// TODO: should modifiers (also) be handled here?
+
+	_, err := r.client.delete(r.endpoint, r.modifiers)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *ApplicationTagsResource) Select(s string) *ApplicationTagsResource {
 	r.modifiers.AddSelect(s)
 	return r

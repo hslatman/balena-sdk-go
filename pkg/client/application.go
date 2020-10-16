@@ -80,3 +80,52 @@ func (r *ApplicationResource) Tags() *ApplicationTagsResource {
 	tr.modifiers.AddFilter("application/id%20eq%20'" + strconv.Itoa(r.applicationID) + "'")
 	return tr
 }
+
+func (r *ApplicationResource) Releases() *ReleasesResource {
+	rr := NewReleasesResource(
+		r.client,
+	)
+	filter := "belongs_to__application%20eq%20'" + strconv.Itoa(r.applicationID) + "'"
+	rr.modifiers.AddFilter(filter)
+	return rr
+}
+
+func (r *ApplicationResource) Services() *ServicesResource {
+	sr := NewServicesResource(
+		r.client,
+	)
+	filter := "application/id%20eq%20'" + strconv.Itoa(r.applicationID) + "'"
+	sr.modifiers.AddFilter(filter)
+	return sr
+}
+
+func (r *ApplicationResource) AddTag(key string, value string) (models.ApplicationTag, error) {
+
+	ar := NewApplicationTagsResource(
+		r.client,
+	)
+
+	return ar.Create(r.applicationID, key, value)
+}
+
+func (r *ApplicationResource) UpdateTag(key string, value string) error {
+
+	ar := NewApplicationTagsResource(
+		r.client,
+	)
+
+	ar.modifiers.AddFilter("application/id%20eq%20'" + strconv.Itoa(r.applicationID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return ar.Update(value)
+}
+
+func (r *ApplicationResource) DeleteTag(key string) error {
+
+	ar := NewApplicationTagsResource(
+		r.client,
+	)
+
+	ar.modifiers.AddFilter("application/id%20eq%20'" + strconv.Itoa(r.applicationID) + "'%20and%20tag_key%20eq%20'" + key + "'")
+
+	return ar.Delete()
+}

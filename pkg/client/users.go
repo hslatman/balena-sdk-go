@@ -15,6 +15,8 @@
 package client
 
 import (
+	"strconv"
+
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/m7shapan/njson"
 	"github.com/tidwall/gjson"
@@ -56,6 +58,18 @@ func (c *Client) WhoAmI() (models.WhoAmI, error) {
 	}
 
 	return w, nil
+}
+
+func (r *UsersResource) AssociatedWithApplication(applicationID int) *UsersResource {
+
+	// TODO: this could end up in errors when more actions are applied fluently
+	r.endpoint = r.endpoint + "__is_member_of__application"
+	r.modifiers.AddFilter("is_member_of__application%20eq%20'" + strconv.Itoa(applicationID) + "'")
+	r.modifiers.AddExpand("user($select=id,username,actor),application_membership_role($select=id,name,actor)")
+
+	// TODO: the values returned are also a bit weird, because there's a list and in there there's an object ...
+
+	return r
 }
 
 func (r *UsersResource) Select(s string) *UsersResource {
