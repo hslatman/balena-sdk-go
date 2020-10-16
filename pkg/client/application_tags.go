@@ -20,34 +20,34 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceTagsResource struct {
+type ApplicationTagsResource struct {
 	client    *Client
 	endpoint  string
 	modifiers *ODataModifiers
 }
 
-func NewDeviceTagsResource(c *Client) *DeviceTagsResource {
-	return &DeviceTagsResource{
+func NewApplicationTagsResource(c *Client) *ApplicationTagsResource {
+	return &ApplicationTagsResource{
 		client:    c,
-		endpoint:  string(deviceTagsEndpoint),
+		endpoint:  string(applicationTagsEndpoint),
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) DeviceTags() *DeviceTagsResource {
-	return NewDeviceTagsResource(c)
+func (c *Client) ApplicationTags() *ApplicationTagsResource {
+	return NewApplicationTagsResource(c)
 }
 
-func (r *DeviceTagsResource) FindByID(deviceTagID int) *DeviceTagResource {
-	return NewDeviceTagResource(
+func (r *ApplicationTagsResource) FindByID(applicationTagID int) *ApplicationTagResource {
+	return NewApplicationTagResource(
 		r.client,
-		deviceTagID,
+		applicationTagID,
 	)
 }
 
-func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
+func (r *ApplicationTagsResource) Get() (map[int]models.ApplicationTag, error) {
 
-	tags := make(map[int]models.DeviceTag)
+	tags := make(map[int]models.ApplicationTag)
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
@@ -59,7 +59,7 @@ func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
 	for _, t := range data.Array() {
-		tag := models.DeviceTag{}
+		tag := models.ApplicationTag{}
 		if err := njson.Unmarshal([]byte(t.Raw), &tag); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
@@ -70,7 +70,12 @@ func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
 
 }
 
-func (r *DeviceTagsResource) Select(s string) *DeviceTagsResource {
+func (r *ApplicationTagsResource) Select(s string) *ApplicationTagsResource {
 	r.modifiers.AddSelect(s)
+	return r
+}
+
+func (r *ApplicationTagsResource) Filter(s string) *ApplicationTagsResource {
+	r.modifiers.AddFilter(s)
 	return r
 }

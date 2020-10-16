@@ -22,29 +22,29 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceTagResource struct {
-	client      *Client
-	endpoint    string
-	deviceTagID int
-	modifiers   *ODataModifiers
+type ReleaseTagResource struct {
+	client       *Client
+	endpoint     string
+	releaseTagID int
+	modifiers    *ODataModifiers
 }
 
-func NewDeviceTagResource(c *Client, deviceTagID int) *DeviceTagResource {
-	return &DeviceTagResource{
-		client:      c,
-		endpoint:    fmt.Sprintf("%s(%d)", deviceTagsEndpoint, deviceTagID),
-		deviceTagID: deviceTagID,
-		modifiers:   NewODataModifiers(c),
+func NewReleaseTagResource(c *Client, releaseTagID int) *ReleaseTagResource {
+	return &ReleaseTagResource{
+		client:       c,
+		endpoint:     fmt.Sprintf("%s(%d)", releaseTagsEndpoint, releaseTagID),
+		releaseTagID: releaseTagID,
+		modifiers:    NewODataModifiers(c),
 	}
 }
 
-func (c *Client) DeviceTag(deviceTagID int) *DeviceTagResource {
-	return NewDeviceTagResource(c, deviceTagID)
+func (c *Client) ReleaseTag(releaseTagID int) *ReleaseTagResource {
+	return NewReleaseTagResource(c, releaseTagID)
 }
 
-func (r *DeviceTagResource) Get() (models.DeviceTag, error) {
+func (r *ReleaseTagResource) Get() (models.ReleaseTag, error) {
 
-	tag := models.DeviceTag{}
+	tag := models.ReleaseTag{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
@@ -66,12 +66,12 @@ func (r *DeviceTagResource) Get() (models.DeviceTag, error) {
 	return tag, nil
 }
 
-func (r *DeviceTagResource) Select(s string) *DeviceTagResource {
+func (r *ReleaseTagResource) Select(s string) *ReleaseTagResource {
 	r.modifiers.AddSelect(s)
 	return r
 }
 
-func (r *DeviceTagResource) Expand(s string) *DeviceTagResource {
+func (r *ReleaseTagResource) Expand(s string) *ReleaseTagResource {
 	r.modifiers.AddExpand(s)
 	return r
 }

@@ -20,7 +20,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DevicesResource struct {
+type ReleasesResource struct {
 	client    *Client
 	endpoint  string
 	modifiers *ODataModifiers
@@ -28,54 +28,54 @@ type DevicesResource struct {
 	// TODO: context, configuration
 }
 
-func NewDevicesResource(c *Client) *DevicesResource {
-	return &DevicesResource{
+func NewReleasesResource(c *Client) *ReleasesResource {
+	return &ReleasesResource{
 		client:    c,
-		endpoint:  string(devicesEndpoint),
+		endpoint:  string(releasesEndpoint),
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Devices() *DevicesResource {
-	return NewDevicesResource(c)
+func (c *Client) Releases() *ReleasesResource {
+	return NewReleasesResource(c)
 }
 
-func (r *DevicesResource) Select(s string) *DevicesResource {
+func (r *ReleasesResource) Select(s string) *ReleasesResource {
 	r.modifiers.AddSelect(s)
 	return r
 }
 
-func (r *DevicesResource) Filter(f string) *DevicesResource {
+func (r *ReleasesResource) Filter(f string) *ReleasesResource {
 	r.modifiers.AddFilter(f)
 	return r
 }
 
-func (r *DevicesResource) Get() (map[int]models.Device, error) {
+func (r *ReleasesResource) Get() (map[int]models.Release, error) {
 
-	devices := make(map[int]models.Device)
+	releases := make(map[int]models.Release)
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return devices, err
+		return releases, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
-	for _, d := range data.Array() {
-		device := models.Device{}
-		if err := njson.Unmarshal([]byte(d.Raw), &device); err != nil {
-			return devices, err // TODO: don't do early return, but just skip this one and aggregate error?
+	for _, r := range data.Array() {
+		release := models.Release{}
+		if err := njson.Unmarshal([]byte(r.Raw), &release); err != nil {
+			return releases, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
-		devices[device.ID] = device
+		releases[release.ID] = release
 	}
 
-	return devices, nil
+	return releases, nil
 }
 
-func (r *DevicesResource) FindByID(deviceID int) *DeviceResource {
-	return NewDeviceResource(
+func (r *ReleasesResource) FindByID(releaseID int) *ReleaseResource {
+	return NewReleaseResource(
 		r.client,
-		deviceID,
+		releaseID,
 	)
 }

@@ -72,6 +72,7 @@ func main() {
 
 This SDK uses the Balena OData API to retrieve and update data.
 The OData implementation is not generic and mostly geared towards the Balena API.
+It was inspired by the implementation in [gosip](https://github.com/koltyakov/gosip).
 
 ## TODO
 
@@ -84,3 +85,6 @@ The OData implementation is not generic and mostly geared towards the Balena API
 * Implement ID type (i.e. DeviceID, TagID, etc.)
 * More model fields; they are incomplete now.
 * Add code generation for Select(), Filter(), Expand(), etc?
+* Add typesafe handling of OData modifiers (i.e. eq, neq, etc.)
+* Add chaining of multiple subselects (if possible)
+* Add context.Context to requests (in the resources object?)

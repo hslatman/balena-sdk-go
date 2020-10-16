@@ -15,7 +15,7 @@
 package models
 
 type WhoAmI struct {
-	ID       int    `json:"id"`
-	EMail    string `json:"email"`
-	Username string `json:"username"`
+	ID       int    `njson:"id"`
+	EMail    string `njson:"email"`
+	Username string `njson:"username"`
 }

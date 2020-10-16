@@ -23,60 +23,60 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceResource struct {
-	client    *Client
-	endpoint  string
-	deviceID  int
-	modifiers *ODataModifiers
+type ApplicationResource struct {
+	client        *Client
+	endpoint      string
+	applicationID int
+	modifiers     *ODataModifiers
 }
 
-func NewDeviceResource(c *Client, deviceID int) *DeviceResource {
-	return &DeviceResource{
-		client:    c,
-		endpoint:  fmt.Sprintf("%s(%d)", devicesEndpoint, deviceID),
-		deviceID:  deviceID,
-		modifiers: NewODataModifiers(c),
+func NewApplicationResource(c *Client, applicationID int) *ApplicationResource {
+	return &ApplicationResource{
+		client:        c,
+		endpoint:      fmt.Sprintf("%s(%d)", applicationsEndpoint, applicationID),
+		applicationID: applicationID,
+		modifiers:     NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Device(deviceID int) *DeviceResource {
-	return NewDeviceResource(c, deviceID)
+func (c *Client) Application(applicationID int) *ApplicationResource {
+	return NewApplicationResource(c, applicationID)
 }
 
-func (r *DeviceResource) Get() (models.Device, error) {
+func (r *ApplicationResource) Get() (models.Application, error) {
 
-	device := models.Device{}
+	application := models.Application{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return device, err
+		return application, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 	first := data.Get("0")                   // first (and only) device
 
 	if !first.Exists() {
-		return device, fmt.Errorf("%s not found", r.endpoint)
+		return application, fmt.Errorf("%s not found", r.endpoint)
 	}
 
-	if err := njson.Unmarshal([]byte(first.Raw), &device); err != nil {
-		return device, err
+	if err := njson.Unmarshal([]byte(first.Raw), &application); err != nil {
+		return application, err
 	}
 
-	return device, nil
+	return application, nil
 }
 
-func (r *DeviceResource) Select(s string) *DeviceResource {
+func (r *ApplicationResource) Select(s string) *ApplicationResource {
 	r.modifiers.AddSelect(s) // TODO: add validation that fields to be selected are valid fields for Device?
 	return r
 }
 
-func (r *DeviceResource) Tags() *DeviceTagsResource {
-	tr := NewDeviceTagsResource(
+func (r *ApplicationResource) Tags() *ApplicationTagsResource {
+	tr := NewApplicationTagsResource(
 		r.client,
 	)
 	// TODO: improve the formatting of this filter; Balena API seems to require this like this?
-	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'")
+	tr.modifiers.AddFilter("application/id%20eq%20'" + strconv.Itoa(r.applicationID) + "'")
 	return tr
 }

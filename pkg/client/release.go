@@ -23,60 +23,60 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceResource struct {
+type ReleaseResource struct {
 	client    *Client
 	endpoint  string
-	deviceID  int
+	releaseID int
 	modifiers *ODataModifiers
 }
 
-func NewDeviceResource(c *Client, deviceID int) *DeviceResource {
-	return &DeviceResource{
+func NewReleaseResource(c *Client, releaseID int) *ReleaseResource {
+	return &ReleaseResource{
 		client:    c,
-		endpoint:  fmt.Sprintf("%s(%d)", devicesEndpoint, deviceID),
-		deviceID:  deviceID,
+		endpoint:  fmt.Sprintf("%s(%d)", releasesEndpoint, releaseID),
+		releaseID: releaseID,
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Device(deviceID int) *DeviceResource {
-	return NewDeviceResource(c, deviceID)
+func (c *Client) Release(releaseID int) *ReleaseResource {
+	return NewReleaseResource(c, releaseID)
 }
 
-func (r *DeviceResource) Get() (models.Device, error) {
+func (r *ReleaseResource) Get() (models.Release, error) {
 
-	device := models.Device{}
+	release := models.Release{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return device, err
+		return release, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 	first := data.Get("0")                   // first (and only) device
 
 	if !first.Exists() {
-		return device, fmt.Errorf("%s not found", r.endpoint)
+		return release, fmt.Errorf("%s not found", r.endpoint)
 	}
 
-	if err := njson.Unmarshal([]byte(first.Raw), &device); err != nil {
-		return device, err
+	if err := njson.Unmarshal([]byte(first.Raw), &release); err != nil {
+		return release, err
 	}
 
-	return device, nil
+	return release, nil
 }
 
-func (r *DeviceResource) Select(s string) *DeviceResource {
+func (r *ReleaseResource) Select(s string) *ReleaseResource {
 	r.modifiers.AddSelect(s) // TODO: add validation that fields to be selected are valid fields for Device?
 	return r
 }
 
-func (r *DeviceResource) Tags() *DeviceTagsResource {
-	tr := NewDeviceTagsResource(
+func (r *ReleaseResource) Tags() *ReleaseTagsResource {
+	tr := NewReleaseTagsResource(
 		r.client,
 	)
 	// TODO: improve the formatting of this filter; Balena API seems to require this like this?
-	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'")
+	tr.modifiers.AddFilter("release/id%20eq%20'" + strconv.Itoa(r.releaseID) + "'")
 	return tr
 }

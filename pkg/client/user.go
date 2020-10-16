@@ -16,67 +16,57 @@ package client
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/hslatman/balena-sdk-go/pkg/models"
 	"github.com/m7shapan/njson"
 	"github.com/tidwall/gjson"
 )
 
-type DeviceResource struct {
+type UserResource struct {
 	client    *Client
 	endpoint  string
-	deviceID  int
+	userID    int
 	modifiers *ODataModifiers
 }
 
-func NewDeviceResource(c *Client, deviceID int) *DeviceResource {
-	return &DeviceResource{
+func NewUserResource(c *Client, userID int) *UserResource {
+	return &UserResource{
 		client:    c,
-		endpoint:  fmt.Sprintf("%s(%d)", devicesEndpoint, deviceID),
-		deviceID:  deviceID,
+		endpoint:  fmt.Sprintf("%s(%d)", usersEndpoint, userID),
+		userID:    userID,
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) Device(deviceID int) *DeviceResource {
-	return NewDeviceResource(c, deviceID)
+func (c *Client) User(userID int) *UserResource {
+	return NewUserResource(c, userID)
 }
 
-func (r *DeviceResource) Get() (models.Device, error) {
+func (r *UserResource) Get() (models.User, error) {
 
-	device := models.Device{}
+	user := models.User{}
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
 	if err != nil {
-		return device, err
+		return user, err
 	}
 
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 	first := data.Get("0")                   // first (and only) device
 
 	if !first.Exists() {
-		return device, fmt.Errorf("%s not found", r.endpoint)
+		return user, fmt.Errorf("%s not found", r.endpoint)
 	}
 
-	if err := njson.Unmarshal([]byte(first.Raw), &device); err != nil {
-		return device, err
+	if err := njson.Unmarshal([]byte(first.Raw), &user); err != nil {
+		return user, err
 	}
 
-	return device, nil
+	return user, nil
 }
 
-func (r *DeviceResource) Select(s string) *DeviceResource {
+func (r *UserResource) Select(s string) *UserResource {
 	r.modifiers.AddSelect(s) // TODO: add validation that fields to be selected are valid fields for Device?
 	return r
-}
-
-func (r *DeviceResource) Tags() *DeviceTagsResource {
-	tr := NewDeviceTagsResource(
-		r.client,
-	)
-	// TODO: improve the formatting of this filter; Balena API seems to require this like this?
-	tr.modifiers.AddFilter("device/id%20eq%20'" + strconv.Itoa(r.deviceID) + "'")
-	return tr
 }

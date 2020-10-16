@@ -15,11 +15,11 @@
 package models
 
 type Application struct {
-	ID         int    `json:"id"`
-	Name       string `json:"app_name"`
-	Slug       string `json:"slug"`
-	DeviceType string `json:"device_type"`
-	IsPublic   bool   `json:"is_public"`
-	IsHost     bool   `json:"is_host"`
-	IsArchived bool   `json:"is_archived"`
+	ID         int    `njson:"id"`
+	Name       string `njson:"app_name"`
+	Slug       string `njson:"slug"`
+	DeviceType string `njson:"device_type"`
+	IsPublic   bool   `njson:"is_public"`
+	IsHost     bool   `njson:"is_host"`
+	IsArchived bool   `njson:"is_archived"`
 }

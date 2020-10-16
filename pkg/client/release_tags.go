@@ -20,34 +20,34 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type DeviceTagsResource struct {
+type ReleaseTagsResource struct {
 	client    *Client
 	endpoint  string
 	modifiers *ODataModifiers
 }
 
-func NewDeviceTagsResource(c *Client) *DeviceTagsResource {
-	return &DeviceTagsResource{
+func NewReleaseTagsResource(c *Client) *ReleaseTagsResource {
+	return &ReleaseTagsResource{
 		client:    c,
-		endpoint:  string(deviceTagsEndpoint),
+		endpoint:  string(releaseTagsEndpoint),
 		modifiers: NewODataModifiers(c),
 	}
 }
 
-func (c *Client) DeviceTags() *DeviceTagsResource {
-	return NewDeviceTagsResource(c)
+func (c *Client) ReleaseTags() *ReleaseTagsResource {
+	return NewReleaseTagsResource(c)
 }
 
-func (r *DeviceTagsResource) FindByID(deviceTagID int) *DeviceTagResource {
-	return NewDeviceTagResource(
+func (r *ReleaseTagsResource) FindByID(releaseTagID int) *ReleaseTagResource {
+	return NewReleaseTagResource(
 		r.client,
-		deviceTagID,
+		releaseTagID,
 	)
 }
 
-func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
+func (r *ReleaseTagsResource) Get() (map[int]models.ReleaseTag, error) {
 
-	tags := make(map[int]models.DeviceTag)
+	tags := make(map[int]models.ReleaseTag)
 
 	resp, err := r.client.get(r.endpoint, r.modifiers)
 
@@ -59,7 +59,7 @@ func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
 	data := gjson.GetBytes(resp.Body(), "d") // get data; a list of results
 
 	for _, t := range data.Array() {
-		tag := models.DeviceTag{}
+		tag := models.ReleaseTag{}
 		if err := njson.Unmarshal([]byte(t.Raw), &tag); err != nil {
 			return tags, err // TODO: don't do early return, but just skip this one and aggregate error?
 		}
@@ -70,7 +70,12 @@ func (r *DeviceTagsResource) Get() (map[int]models.DeviceTag, error) {
 
 }
 
-func (r *DeviceTagsResource) Select(s string) *DeviceTagsResource {
+func (r *ReleaseTagsResource) Select(s string) *ReleaseTagsResource {
 	r.modifiers.AddSelect(s)
+	return r
+}
+
+func (r *ReleaseTagsResource) Filter(s string) *ReleaseTagsResource {
+	r.modifiers.AddFilter(s)
 	return r
 }
